@@ -1,5 +1,0 @@
-Lista original: [100, 98, 78, 45, 238, 390, 67, 98, 100, 98, 100, 98, 100, 55]
-Lista com valores classificados: ['normal', 'normal', 'abaixo', 'abaixo', 'acima', 'acima', 'abaixo', 'normal', 'normal', 'normal', 'normal', 'normal', 'normal', 'abaixo']
-Média dos valores: 118.92857142857143
-Mediana dos valores: 98.0
-Moda dos valores: [100, 98]
