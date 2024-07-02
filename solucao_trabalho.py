@@ -1,43 +1,39 @@
 import csv
-from statistics import mean, median, mode
+from datetime import datetime
 
-class Glicemia:
-    @staticmethod
-    def convert_to_int(dado): # Para evitar a repetição de código para cada atributo
-        return int(dado) if dado.strip() and dado.strip().isdigit() else None
+def parse_date(date_str):
+    try:
+        return datetime.strptime(date_str, '%d/%m/%Y').date()
+    except ValueError:
+        return None
 
-    def __init__(self, dados):
-        self.glicemia = self.convert_to_int(dados[3])
-        self.kcal = self.convert_to_int(dados[5])
-        self.carb = self.convert_to_int(dados[6])
+def parse_int(value):
+    try:
+        return int(value)
+    except ValueError:
+        return None
 
-lista_glicemia = []
+def parse_float(value):
+    try:
+        return float(value)
+    except ValueError:
+        return None
 
-# Abre o arquivo X em modo leitura
-with open('glicose_data_suja.csv', 'r') as file:
-    reader = csv.reader(file, delimiter=';')
-    next(reader)  # Ignora o cabeçalho
-    for row in reader:
-        glicemia = Glicemia(row)
-        if all([glicemia.glicemia, glicemia.kcal, glicemia.carb]):  # Verifica se todos os valores são diferentes de None
-            lista_glicemia.append(glicemia)
+def process_row(row):
+    row[2] = parse_date(row[2])  # Convert date of birth
+    row[3] = parse_int(row[3])   # Convert salary
+    row[7] = parse_int(row[7])   # Convert number of sons
+    row[10] = parse_float(row[10])  # Convert rent value
+    return row
 
-# Calcula a média
-media_glicemia = mean([obj.glicemia for obj in lista_glicemia])
-media_kcal = mean([obj.kcal for obj in lista_glicemia])
-media_carb = mean([obj.carb for obj in lista_glicemia])
+# Abra o arquivo CSV
+with open('credit_score.csv', 'r') as arquivo_csv:
+    leitor = csv.reader(arquivo_csv, delimiter=';')
 
-# Calcula a mediana
-mediana_glicemia = median([obj.glicemia for obj in lista_glicemia])
-mediana_kcal = median([obj.kcal for obj in lista_glicemia])
-mediana_carb = median([obj.carb for obj in lista_glicemia])
+    # Pule o cabeçalho
+    next(leitor)
 
-# Calcula a moda
-moda_glicemia = mode([obj.glicemia for obj in lista_glicemia])
-moda_kcal = mode([obj.kcal for obj in lista_glicemia])
-moda_carb = mode([obj.carb for obj in lista_glicemia])
-
-# Mostra resultados na tela
-print(f"Média de glicemia: {media_glicemia}, Kcal: {media_kcal}, Carb: {media_carb}")
-print(f"Mediana de glicemia: {mediana_glicemia}, Kcal: {mediana_kcal}, Carb: {mediana_carb}")
-print(f"Moda de glicemia: {moda_glicemia}, Kcal: {moda_kcal}, Carb: {moda_carb}")
+    # Itere sobre as linhas do arquivo
+    for linha in leitor:
+        linha_processada = process_row(linha)
+        print(linha_processada)
