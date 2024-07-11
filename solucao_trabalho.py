@@ -1,36 +1,43 @@
-import pandas as pd
+import os
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from collections import Counter
 
-file_path = 'credit_score.csv'  # caminho do seu arquivo
+# Caminho para a pasta com os arquivos de texto
+pasta = 'wordnet'
 
-# Tente ler o arquivo CSV 
+# Lista para armazenar todos os tokens
+todos_tokens = []
+
+# Extensões de arquivo para processar
+extensoes = ['.exc', '.bib', '.rev', '.adj', '.adv', '.txt', '.noun', '.verb', '.sense']
+
 try:
-    df = pd.read_csv(file_path, sep=';', encoding='latin-1')
-except UnicodeDecodeError:
-    # Tive problemas para ler o formato do arquivo
-    df = pd.read_csv(file_path, sep=';', encoding='utf-16')
+    # Processamento de cada arquivo na pasta
+    for arquivo in os.listdir(pasta):
+        if any(arquivo.endswith(ext) for ext in extensoes):  # Verifica as extensões
+            caminho_arquivo = os.path.join(pasta, arquivo)
+            with open(caminho_arquivo, 'r', encoding='utf-8') as f:
+                texto = f.read()
+                # Tokenização e filtragem
+                tokens = word_tokenize(texto.lower())
+                filtered_tokens = [word for word in tokens if word.isalpha()]
+                todos_tokens.extend(filtered_tokens)
 
-# Renomear colunas 
-df.columns = ['case', 'name', 'date_birth', 'salary', 'gender', 'marital_status', 'country',
-              'num_children', 'education_degree', 'has_car', 'own_home', 'rent_value', 'credit_score']
+    # Remover stopwords em inglês
+    stop_words = set(stopwords.words('english'))
+    todos_tokens = [word for word in todos_tokens if word not in stop_words]
 
-# Convertendo tipos de dados
-df['date_birth'] = pd.to_datetime(df['date_birth'], format='%d/%m/%Y', errors='coerce')  # Convertendo para formato de data
-df['gender'] = df['gender'].str.lower()  # Normalizando o gênero para minúsculas
+    # Identificar as 50 palavras mais frequentes
+    word_freqs = Counter(todos_tokens)
+    top_50_words = [word for word, freq in word_freqs.most_common(50)]
 
-# Calculando o total_score com os ajustes para calculo de score
-df['total_score'] = (df['salary'] / 1000) - (df['num_children'] * 100) - (df['rent_value'] / 100)
-df['total_score'] += (df['has_car'] * -50) + (df['own_home'] * -50)
+    print('Top 50 palavras mais frequentes:', top_50_words)
 
-# Exibindo os resultados calculados e os registros transformados
-print('Registros do DataFrame após as transformações:')
-print(df)
+except Exception as e:
+    print('Ocorreu um erro:', e)
 
-# Exibindo estatísticas simples do total_score
-print('\nEstatísticas do total_score:')
-print(df['total_score'].describe())
-
-# Salvando o DataFrame em um arquivo CSV
-output_file = 'output_dataframe.csv'
-df.to_csv(output_file, index=False)
-
-print(f'\nDataFrame salvo em {output_file} com sucesso!')
+# Depuração: Verifique se a lista de tokens não está vazia
+if not todos_tokens:
+    print('Nenhum token foi coletado dos arquivos.')
